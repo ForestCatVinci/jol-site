@@ -946,7 +946,7 @@
     <li><a href="#about">About</a></li>
     <li><a href="#kz">Қазақша</a></li>
   </ul>
-  <button class="nav-cta" id="openModal">Sign in</button>
+  <button class="nav-cta" id="openSignIn">Sign in</button>
 </nav>
 
 <!-- HERO -->
@@ -1242,7 +1242,31 @@
   </div>
 </footer>
 
-<!-- SIGN-IN MODAL -->
+<!-- SIGN IN (email only) MODAL -->
+<div class="modal-overlay" id="signinOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="signinTitle">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="signinTitle">Welcome <em>back</em></div>
+        <div class="modal-subtitle">Enter your e-mail to continue</div>
+      </div>
+      <button class="modal-close" id="closeSignIn" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-grid">
+        <div class="form-field full">
+          <label class="field-label" for="si-email">E-mail</label>
+          <input class="field-input" id="si-email" type="email" placeholder="you@mail.kz" autocomplete="email">
+        </div>
+      </div>
+      <div class="modal-divider"></div>
+      <button class="modal-submit" id="signinSubmit">Continue →</button>
+      <div class="modal-note">No password needed · We'll send a login link</div>
+    </div>
+  </div>
+</div>
+
+<!-- SIGN-UP MODAL -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-head">
@@ -1396,9 +1420,58 @@ document.querySelectorAll('.feature-item').forEach(item => {
   });
 });
 
-// Modal
+// Sign-in modal (email only)
+const signinOverlay = document.getElementById('signinOverlay');
+const signinSubmit  = document.getElementById('signinSubmit');
+
+function openSignIn() {
+  signinOverlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeSignIn() {
+  signinOverlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('openSignIn').addEventListener('click', openSignIn);
+document.getElementById('closeSignIn').addEventListener('click', closeSignIn);
+signinOverlay.addEventListener('click', e => { if (e.target === signinOverlay) closeSignIn(); });
+
+signinSubmit.addEventListener('click', async () => {
+  const email = document.getElementById('si-email').value.trim();
+  if (!email) {
+    signinSubmit.textContent = 'Enter your e-mail ↑';
+    signinSubmit.style.background = 'var(--slate)';
+    setTimeout(() => { signinSubmit.textContent = 'Continue →'; signinSubmit.style.background = ''; }, 2000);
+    return;
+  }
+  signinSubmit.textContent = 'Sending…';
+  signinSubmit.disabled = true;
+  try {
+    await fetch('http://localhost:5678/webhook-test/50f7b0a7-386e-47e3-9346-36c1838b6018', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    signinSubmit.textContent = 'Link sent ✓';
+    signinSubmit.style.background = 'var(--deep)';
+    setTimeout(() => {
+      closeSignIn();
+      signinSubmit.textContent = 'Continue →';
+      signinSubmit.style.background = '';
+      signinSubmit.disabled = false;
+      document.getElementById('si-email').value = '';
+    }, 2000);
+  } catch (err) {
+    signinSubmit.textContent = 'Connection error — retry';
+    signinSubmit.style.background = 'var(--slate)';
+    signinSubmit.disabled = false;
+    setTimeout(() => { signinSubmit.textContent = 'Continue →'; signinSubmit.style.background = ''; }, 3000);
+  }
+});
+
+// Sign-up modal (full registration)
 const overlay = document.getElementById('modalOverlay');
-const openBtn = document.getElementById('openModal');
 const closeBtn = document.getElementById('closeModal');
 const submitBtn = document.getElementById('modalSubmit');
 
@@ -1411,11 +1484,10 @@ function closeModal() {
   document.body.style.overflow = '';
 }
 
-openBtn.addEventListener('click', openModal);
 document.getElementById('openModalCta').addEventListener('click', openModal);
 closeBtn.addEventListener('click', closeModal);
 overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeSignIn(); } });
 
 submitBtn.addEventListener('click', async () => {
   const username = document.getElementById('f-username').value.trim();
