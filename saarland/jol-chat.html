@@ -747,38 +747,14 @@ function fillPrompt(text) {
   input.focus();
 }
 
-// Demo bot responses
-const botResponses = [
-  {
-    match: /math|tech|phone|program|it|computer/i,
-    reply: "That combination — math and technology — opens three strong directions:\n\n1. Software engineering (highest demand)\n2. Data science & analytics\n3. Telecommunications & networks\n\nAll three have solid salary floors in Kazakhstan and growing demand. Want me to break down what each path looks like day-to-day?",
-    chips: ["Tell me about software engineering", "Show me salary data", "Which universities offer these?"]
-  },
-  {
-    match: /grant|funding|scholarship|money/i,
-    reply: "There are currently 54,000+ state grants available per year in Kazakhstan. Many go unclaimed because students don't know they qualify.\n\nKey ones to know:\n— Болашақ (international, competitive)\n— Аймақтық грант (region-specific, less competition)\n— University-specific grants\n— Akimat grants per region\n\nWhich region are you from? I can filter what's actually relevant for you.",
-    chips: ["I'm from Turkestan region", "I'm from Almaty", "Tell me about Болашақ"]
-  },
-  {
-    match: /plan|roadmap|ent|schedule|month/i,
-    reply: "To build your month-by-month plan I need two things:\n\n— What grade are you in now?\n— Which direction are you leaning toward (or still unsure)?\n\nWith that I'll map out every deadline, registration window, and prep milestone between now and university entry.",
-    chips: ["Grade 10, unsure of direction", "Grade 11, IT direction", "Already graduated"]
-  },
-  {
-    match: /village|rural|small town|region/i,
-    reply: "Good news: there are grants specifically for students from rural regions — and they have less competition than national ones.\n\nYour region is actually an advantage here, not a disadvantage. The system has quotas that favor students from outside major cities.\n\nWhat region are you from? I'll pull the exact list.",
-    chips: ["Turkestan region", "Pavlodar region", "Kyzylorda region", "Other region"]
-  },
-  {
-    match: /.*/, // default
-    reply: "Understood. Tell me a bit more about yourself — what region you're from, what grade you're in, and what subjects you find interesting. Even rough answers. I'll work with what you give me.",
-    chips: ["I like science and math", "I'm not sure what I like", "Tell me about popular careers in KZ"]
-  }
-];
+const WEBHOOK_URL = 'http://localhost:5678/webhook/5c8d5ff3-42be-49ef-90cd-d14073ee6024';
+
+// Unique session ID per page load for conversation context
+const sessionId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
 
 let isWaiting = false;
 
-function send() {
+async function send() {
   const text = input.value.trim();
   if (!text || isWaiting) return;
 
@@ -791,16 +767,25 @@ function send() {
 
   const typingRow = addTyping();
 
-  const delay = 900 + Math.random() * 800;
-  setTimeout(() => {
+  try {
+    const res = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chatInput: text, sessionId })
+    });
+
+    const data = await res.json();
     typingRow.remove();
 
-    const response = botResponses.find(r => r.match.test(text)) || botResponses[botResponses.length - 1];
-    addMessage(response.reply, 'bot');
-    if (response.chips) addChips(response.chips);
+    // Handle common n8n response field names
+    const reply = data.output ?? data.text ?? data.message ?? data.response ?? data.reply ?? data.answer;
+    addMessage(reply || 'No response received.', 'bot');
+  } catch (err) {
+    typingRow.remove();
+    addMessage('Connection error — please check your connection and try again.', 'bot');
+  }
 
-    isWaiting = false;
-  }, delay);
+  isWaiting = false;
 }
 
 function clearChat() {
