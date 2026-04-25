@@ -1447,11 +1447,8 @@ submitBtn.addEventListener('click', async () => {
     submitBtn.textContent = 'Profile created ✓';
     submitBtn.style.background = 'var(--deep)';
     setTimeout(() => {
-      closeModal();
-      submitBtn.textContent = 'Create profile →';
-      submitBtn.style.background = '';
-      submitBtn.disabled = false;
-    }, 1800);
+      window.location.href = 'jol-next.html';
+    }, 1000);
   } catch (err) {
     submitBtn.textContent = 'Connection error — retry';
     submitBtn.style.background = 'var(--slate)';
