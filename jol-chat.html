@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Жол — Chat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ice: #EEF2F7;
+    --frost: #D8E4EF;
+    --mist: #B8CCDD;
+    --slate: #8AA3B8;
+    --deep: #4A6275;
+    --ink: #1C2B36;
+    --white: #F7FAFC;
+    --glass: rgba(216,228,239,0.35);
+    --glass-border: rgba(184,204,221,0.5);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    font-family: 'DM Mono', monospace;
+    background: var(--ice);
+    color: var(--ink);
+    overflow: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed;
+    width: 8px; height: 8px;
+    background: var(--deep);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: width 0.2s, height 0.2s, background 0.2s;
+  }
+  .cursor-ring {
+    position: fixed;
+    width: 32px; height: 32px;
+    border: 1px solid var(--mist);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: width 0.25s, height 0.25s, border-color 0.2s;
+  }
+  body:has(a:hover) .cursor-ring,
+  body:has(button:hover) .cursor-ring { width: 48px; height: 48px; border-color: var(--deep); }
+
+  /* Snow */
+  .snow-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* Layout */
+  .layout {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  /* Header */
+  header {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 40px;
+    background: rgba(238,242,247,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--glass-border);
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .back-link {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--slate);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--ink); }
+  .back-link::before { content: '←'; }
+  .divider-dot {
+    width: 3px; height: 3px;
+    background: var(--mist);
+    border-radius: 50%;
+  }
+  .header-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .header-brand span { font-style: italic; color: var(--slate); }
+
+  .header-center {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .advisor-avatar {
+    width: 30px; height: 30px;
+    background: var(--mist);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    color: var(--deep);
+    flex-shrink: 0;
+  }
+  .advisor-info {}
+  .advisor-name {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+  .advisor-status {
+    font-size: 10px;
+    color: var(--slate);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 2px;
+  }
+  .online-dot {
+    width: 5px; height: 5px;
+    background: var(--deep);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .header-action {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--slate);
+    background: none;
+    border: 1px solid var(--glass-border);
+    padding: 8px 16px;
+    cursor: none;
+    transition: all 0.2s;
+  }
+  .header-action:hover {
+    color: var(--ink);
+    border-color: var(--mist);
+  }
+
+  /* Messages area */
+  .messages-wrap {
+    flex: 1;
+    overflow-y: auto;
+    padding: 40px 0 24px;
+    scroll-behavior: smooth;
+  }
+  .messages-wrap::-webkit-scrollbar { width: 4px; }
+  .messages-wrap::-webkit-scrollbar-track { background: transparent; }
+  .messages-wrap::-webkit-scrollbar-thumb { background: var(--frost); }
+
+  .messages-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* Day marker */
+  .day-marker {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 8px 0;
+  }
+  .day-marker::before,
+  .day-marker::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--frost);
+  }
+  .day-marker span {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--mist);
+  }
+
+  /* Message row */
+  .msg-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .msg-row.user {
+    flex-direction: row-reverse;
+  }
+
+  .msg-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 11px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .msg-row.bot .msg-avatar {
+    background: var(--mist);
+    color: var(--deep);
+  }
+  .msg-row.user .msg-avatar {
+    background: var(--frost);
+    color: var(--slate);
+  }
+
+  .msg-content {
+    flex: 1;
+    max-width: 78%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .msg-row.user .msg-content { align-items: flex-end; }
+
+  .bubble {
+    padding: 12px 16px;
+    font-size: 12px;
+    line-height: 1.75;
+    font-weight: 300;
+  }
+  .msg-row.bot .bubble {
+    background: var(--white);
+    border: 1px solid var(--glass-border);
+    color: var(--ink);
+  }
+  .msg-row.user .bubble {
+    background: var(--ink);
+    color: var(--ice);
+  }
+
+  .msg-time {
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    color: var(--mist);
+    padding: 0 2px;
+  }
+
+  /* Suggestion chips */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 2px;
+  }
+  .chip {
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    padding: 6px 14px;
+    border: 1px solid var(--mist);
+    color: var(--deep);
+    background: none;
+    cursor: none;
+    transition: all 0.2s;
+    font-family: 'DM Mono', monospace;
+  }
+  .chip:hover {
+    background: var(--ink);
+    color: var(--ice);
+    border-color: var(--ink);
+  }
+
+  /* Typing indicator */
+  .typing-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .typing-indicator {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--white);
+    border: 1px solid var(--glass-border);
+    width: fit-content;
+  }
+  .typing-indicator span {
+    width: 4px; height: 4px;
+    background: var(--mist);
+    border-radius: 50%;
+    animation: typingDot 1.4s ease-in-out infinite;
+  }
+  .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typingDot {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-4px); opacity: 1; }
+  }
+
+  /* Input bar */
+  .input-bar {
+    flex-shrink: 0;
+    padding: 20px 24px 28px;
+    background: rgba(238,242,247,0.9);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--glass-border);
+  }
+  .input-inner {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .input-box {
+    display: flex;
+    align-items: flex-end;
+    gap: 0;
+    border: 1px solid var(--mist);
+    background: var(--white);
+    transition: border-color 0.2s;
+  }
+  .input-box:focus-within {
+    border-color: var(--deep);
+  }
+  .input-box textarea {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    padding: 14px 18px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--ink);
+    font-weight: 300;
+    resize: none;
+    min-height: 48px;
+    max-height: 160px;
+    line-height: 1.6;
+  }
+  .input-box textarea::placeholder { color: var(--mist); }
+  .input-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 10px;
+  }
+  .lang-toggle {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--slate);
+    background: none;
+    border: 1px solid var(--frost);
+    padding: 5px 10px;
+    cursor: none;
+    transition: all 0.2s;
+    font-family: 'DM Mono', monospace;
+  }
+  .lang-toggle:hover {
+    color: var(--ink);
+    border-color: var(--mist);
+  }
+  .send-btn {
+    width: 34px; height: 34px;
+    background: var(--ink);
+    color: var(--ice);
+    border: none;
+    cursor: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .send-btn:hover { background: var(--deep); }
+  .send-btn:disabled { background: var(--frost); color: var(--mist); }
+
+  .input-hint {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    padding: 0 2px;
+  }
+  .hint-text {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    color: var(--mist);
+  }
+  .char-count {
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    color: var(--mist);
+  }
+
+  /* Empty state */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 24px;
+    text-align: center;
+    gap: 0;
+  }
+  .empty-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 48px;
+    font-weight: 300;
+    color: var(--ink);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .empty-logo span { font-style: italic; color: var(--mist); }
+  .empty-tagline {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-bottom: 48px;
+  }
+  .empty-prompts {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    max-width: 520px;
+    width: 100%;
+  }
+  .prompt-card {
+    background: var(--white);
+    border: 1px solid var(--glass-border);
+    padding: 16px 18px;
+    text-align: left;
+    cursor: none;
+    transition: border-color 0.2s, background 0.2s;
+    font-family: 'DM Mono', monospace;
+  }
+  .prompt-card:hover {
+    border-color: var(--mist);
+    background: var(--ice);
+  }
+  .prompt-card-label {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--mist);
+    margin-bottom: 6px;
+  }
+  .prompt-card-text {
+    font-size: 11px;
+    color: var(--deep);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  @media (max-width: 640px) {
+    header { padding: 14px 16px; }
+    .header-center { display: none; }
+    .messages-inner { padding: 0 16px; }
+    .input-bar { padding: 14px 16px 20px; }
+    .empty-prompts { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<canvas class="snow-canvas" id="snow"></canvas>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<div class="layout">
+
+  <!-- Header -->
+  <header>
+    <div class="header-left">
+      <a href="jol-website.html" class="back-link">Back</a>
+      <div class="divider-dot"></div>
+      <a href="jol-website.html" class="header-brand">Жол <span>/ path</span></a>
+    </div>
+
+    <div class="header-center">
+      <div class="advisor-avatar">Ж</div>
+      <div class="advisor-info">
+        <div class="advisor-name">Жол — your advisor</div>
+        <div class="advisor-status">
+          <div class="online-dot"></div>
+          Қазақша · Русский · English
+        </div>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <button class="header-action" id="clearBtn">New chat</button>
+    </div>
+  </header>
+
+  <!-- Messages -->
+  <div class="messages-wrap" id="messagesWrap">
+    <div class="messages-inner" id="messagesInner">
+
+      <!-- Empty / welcome state -->
+      <div class="empty-state" id="emptyState">
+        <div class="empty-logo">Жол <span>/ path</span></div>
+        <div class="empty-tagline">Your AI advisor for university &amp; career</div>
+        <div class="empty-prompts">
+          <button class="prompt-card" onclick="fillPrompt('I don\'t know what to study after school')">
+            <div class="prompt-card-label">Direction</div>
+            <div class="prompt-card-text">I don't know what to study after school</div>
+          </button>
+          <button class="prompt-card" onclick="fillPrompt('What grants exist for students from my region?')">
+            <div class="prompt-card-label">Funding</div>
+            <div class="prompt-card-text">What grants exist for students from my region?</div>
+          </button>
+          <button class="prompt-card" onclick="fillPrompt('Build me a month-by-month plan for ENT preparation')">
+            <div class="prompt-card-label">Roadmap</div>
+            <div class="prompt-card-text">Build me a month-by-month plan for ENT preparation</div>
+          </button>
+          <button class="prompt-card" onclick="fillPrompt('What career paths suit someone who likes math and technology?')">
+            <div class="prompt-card-label">Career</div>
+            <div class="prompt-card-text">What career paths suit someone who likes math and technology?</div>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Input bar -->
+  <div class="input-bar">
+    <div class="input-inner">
+      <div class="input-box">
+        <textarea
+          id="chatInput"
+          placeholder="Ask anything about your future..."
+          rows="1"
+        ></textarea>
+        <div class="input-actions">
+          <button class="lang-toggle" id="langBtn" title="Switch language">KZ</button>
+          <button class="send-btn" id="sendBtn" disabled title="Send">↑</button>
+        </div>
+      </div>
+      <div class="input-hint">
+        <span class="hint-text">Press Enter to send · Shift+Enter for new line</span>
+        <span class="char-count" id="charCount">0 / 500</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// --- Cursor ---
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+});
+function animRing() {
+  rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+  ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+  requestAnimationFrame(animRing);
+}
+animRing();
+
+// --- Snow ---
+const canvas = document.getElementById('snow');
+const ctx = canvas.getContext('2d');
+function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+const flakes = Array.from({length: 50}, () => ({
+  x: Math.random() * canvas.width,
+  y: Math.random() * canvas.height,
+  r: Math.random() * 2.5 + 0.5,
+  speed: Math.random() * 0.5 + 0.15,
+  drift: Math.random() * 0.25 - 0.12,
+  opacity: Math.random() * 0.4 + 0.08
+}));
+
+function drawSnow() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  flakes.forEach(f => {
+    ctx.beginPath();
+    ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(100,130,160,${f.opacity})`;
+    ctx.fill();
+    f.y += f.speed; f.x += f.drift;
+    if (f.y > canvas.height) { f.y = -5; f.x = Math.random() * canvas.width; }
+    if (f.x > canvas.width) f.x = 0;
+    if (f.x < 0) f.x = canvas.width;
+  });
+  requestAnimationFrame(drawSnow);
+}
+drawSnow();
+
+// --- Chat logic ---
+const input = document.getElementById('chatInput');
+const sendBtn = document.getElementById('sendBtn');
+const messagesInner = document.getElementById('messagesInner');
+const emptyState = document.getElementById('emptyState');
+const charCount = document.getElementById('charCount');
+const langBtn = document.getElementById('langBtn');
+const clearBtn = document.getElementById('clearBtn');
+const wrap = document.getElementById('messagesWrap');
+
+let langs = ['KZ', 'RU', 'EN'];
+let langIdx = 0;
+langBtn.addEventListener('click', () => {
+  langIdx = (langIdx + 1) % langs.length;
+  langBtn.textContent = langs[langIdx];
+});
+
+// Auto-resize textarea
+input.addEventListener('input', () => {
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 160) + 'px';
+  const len = input.value.length;
+  charCount.textContent = len + ' / 500';
+  sendBtn.disabled = len === 0 || len > 500;
+});
+
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    if (!sendBtn.disabled) send();
+  }
+});
+
+sendBtn.addEventListener('click', send);
+clearBtn.addEventListener('click', clearChat);
+
+function now() {
+  return new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+}
+
+function hideEmpty() {
+  if (emptyState && emptyState.parentNode) {
+    emptyState.remove();
+  }
+}
+
+function addMessage(text, role) {
+  hideEmpty();
+  const row = document.createElement('div');
+  row.className = 'msg-row ' + role;
+
+  const initials = role === 'bot' ? 'Ж' : 'Вы';
+  row.innerHTML = `
+    <div class="msg-avatar">${initials}</div>
+    <div class="msg-content">
+      <div class="bubble">${escapeHtml(text)}</div>
+      <div class="msg-time">${now()}</div>
+    </div>`;
+  messagesInner.appendChild(row);
+  scrollBottom();
+  return row;
+}
+
+function addTyping() {
+  hideEmpty();
+  const row = document.createElement('div');
+  row.className = 'typing-row';
+  row.innerHTML = `
+    <div class="msg-avatar" style="width:28px;height:28px;border-radius:50%;background:var(--mist);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:11px;color:var(--deep);flex-shrink:0;margin-top:2px;">Ж</div>
+    <div class="typing-indicator"><span></span><span></span><span></span></div>`;
+  messagesInner.appendChild(row);
+  scrollBottom();
+  return row;
+}
+
+function addChips(chips) {
+  const container = document.createElement('div');
+  container.className = 'msg-row bot';
+  container.innerHTML = `<div style="width:28px;flex-shrink:0"></div><div class="chips">${
+    chips.map(c => `<button class="chip" onclick="chipClick(this)">${c}</button>`).join('')
+  }</div>`;
+  messagesInner.appendChild(container);
+  scrollBottom();
+}
+
+function chipClick(btn) {
+  fillPrompt(btn.textContent);
+  send();
+}
+
+function scrollBottom() {
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function fillPrompt(text) {
+  input.value = text;
+  input.dispatchEvent(new Event('input'));
+  input.focus();
+}
+
+// Demo bot responses
+const botResponses = [
+  {
+    match: /math|tech|phone|program|it|computer/i,
+    reply: "That combination — math and technology — opens three strong directions:\n\n1. Software engineering (highest demand)\n2. Data science & analytics\n3. Telecommunications & networks\n\nAll three have solid salary floors in Kazakhstan and growing demand. Want me to break down what each path looks like day-to-day?",
+    chips: ["Tell me about software engineering", "Show me salary data", "Which universities offer these?"]
+  },
+  {
+    match: /grant|funding|scholarship|money/i,
+    reply: "There are currently 54,000+ state grants available per year in Kazakhstan. Many go unclaimed because students don't know they qualify.\n\nKey ones to know:\n— Болашақ (international, competitive)\n— Аймақтық грант (region-specific, less competition)\n— University-specific grants\n— Akimat grants per region\n\nWhich region are you from? I can filter what's actually relevant for you.",
+    chips: ["I'm from Turkestan region", "I'm from Almaty", "Tell me about Болашақ"]
+  },
+  {
+    match: /plan|roadmap|ent|schedule|month/i,
+    reply: "To build your month-by-month plan I need two things:\n\n— What grade are you in now?\n— Which direction are you leaning toward (or still unsure)?\n\nWith that I'll map out every deadline, registration window, and prep milestone between now and university entry.",
+    chips: ["Grade 10, unsure of direction", "Grade 11, IT direction", "Already graduated"]
+  },
+  {
+    match: /village|rural|small town|region/i,
+    reply: "Good news: there are grants specifically for students from rural regions — and they have less competition than national ones.\n\nYour region is actually an advantage here, not a disadvantage. The system has quotas that favor students from outside major cities.\n\nWhat region are you from? I'll pull the exact list.",
+    chips: ["Turkestan region", "Pavlodar region", "Kyzylorda region", "Other region"]
+  },
+  {
+    match: /.*/, // default
+    reply: "Understood. Tell me a bit more about yourself — what region you're from, what grade you're in, and what subjects you find interesting. Even rough answers. I'll work with what you give me.",
+    chips: ["I like science and math", "I'm not sure what I like", "Tell me about popular careers in KZ"]
+  }
+];
+
+let isWaiting = false;
+
+function send() {
+  const text = input.value.trim();
+  if (!text || isWaiting) return;
+
+  addMessage(text, 'user');
+  input.value = '';
+  input.style.height = 'auto';
+  charCount.textContent = '0 / 500';
+  sendBtn.disabled = true;
+  isWaiting = true;
+
+  const typingRow = addTyping();
+
+  const delay = 900 + Math.random() * 800;
+  setTimeout(() => {
+    typingRow.remove();
+
+    const response = botResponses.find(r => r.match.test(text)) || botResponses[botResponses.length - 1];
+    addMessage(response.reply, 'bot');
+    if (response.chips) addChips(response.chips);
+
+    isWaiting = false;
+  }, delay);
+}
+
+function clearChat() {
+  messagesInner.innerHTML = '';
+  const empty = document.createElement('div');
+  empty.id = 'emptyState';
+  empty.className = 'empty-state';
+  empty.innerHTML = `
+    <div class="empty-logo">Жол <span>/ path</span></div>
+    <div class="empty-tagline">Your AI advisor for university &amp; career</div>
+    <div class="empty-prompts">
+      <button class="prompt-card" onclick="fillPrompt('I don\'t know what to study after school')">
+        <div class="prompt-card-label">Direction</div>
+        <div class="prompt-card-text">I don't know what to study after school</div>
+      </button>
+      <button class="prompt-card" onclick="fillPrompt('What grants exist for students from my region?')">
+        <div class="prompt-card-label">Funding</div>
+        <div class="prompt-card-text">What grants exist for students from my region?</div>
+      </button>
+      <button class="prompt-card" onclick="fillPrompt('Build me a month-by-month plan for ENT preparation')">
+        <div class="prompt-card-label">Roadmap</div>
+        <div class="prompt-card-text">Build me a month-by-month plan for ENT preparation</div>
+      </button>
+      <button class="prompt-card" onclick="fillPrompt('What career paths suit someone who likes math and technology?')">
+        <div class="prompt-card-label">Career</div>
+        <div class="prompt-card-text">What career paths suit someone who likes math and technology?</div>
+      </button>
+    </div>`;
+  messagesInner.appendChild(empty);
+}
+</script>
+</body>
+</html>
