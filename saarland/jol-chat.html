@@ -795,6 +795,8 @@ async function send() {
 
     // unwrap n8n array if needed, then read output
     const data  = Array.isArray(raw) ? (raw[0]?.json ?? raw[0]) : raw;
+    console.log('[Жол] n8n raw:', JSON.stringify(raw));
+    console.log('[Жол] n8n data:', JSON.stringify(data));
     addMessage(data.output || 'No response received.', 'bot');
   } catch (err) {
     typingRow.remove();
