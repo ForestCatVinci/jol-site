@@ -790,10 +790,11 @@ async function send() {
       body: JSON.stringify({ chatInput: text, sessionId, user_id })
     });
 
-    const data = await res.json();
+    const raw  = await res.json();
     typingRow.remove();
 
-    // Handle common n8n response field names
+    // n8n can return a plain object or an array — unwrap either
+    const data  = Array.isArray(raw) ? (raw[0]?.json ?? raw[0]) : raw;
     const reply = data.output ?? data.text ?? data.message ?? data.response ?? data.reply ?? data.answer;
     addMessage(reply || 'No response received.', 'bot');
   } catch (err) {
