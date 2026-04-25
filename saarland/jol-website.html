@@ -1467,11 +1467,13 @@ closeBtn.addEventListener('click', closeModal);
 overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-submitBtn.addEventListener('click', () => {
+submitBtn.addEventListener('click', async () => {
   const username = document.getElementById('f-username').value.trim();
-  const email = document.getElementById('f-email').value.trim();
-  const grade = document.getElementById('f-grade').value;
-  const region = document.getElementById('f-region').value;
+  const email    = document.getElementById('f-email').value.trim();
+  const telegram = document.getElementById('f-telegram').value.trim();
+  const grade    = document.getElementById('f-grade').value;
+  const region   = document.getElementById('f-region').value;
+  const income   = document.getElementById('f-income').value;
 
   if (!username || !email || !grade || !region) {
     submitBtn.textContent = 'Fill required fields ↑';
@@ -1483,15 +1485,32 @@ submitBtn.addEventListener('click', () => {
     return;
   }
 
-  submitBtn.textContent = 'Profile created ✓';
-  submitBtn.style.background = 'var(--deep)';
+  submitBtn.textContent = 'Sending…';
   submitBtn.disabled = true;
-  setTimeout(() => {
-    closeModal();
-    submitBtn.textContent = 'Create profile →';
-    submitBtn.style.background = '';
+
+  try {
+    await fetch('http://localhost:5678/webhook/1307025e-4ce7-4064-af7d-ec4ac8b4162c', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, email, telegram, grade, region, income })
+    });
+    submitBtn.textContent = 'Profile created ✓';
+    submitBtn.style.background = 'var(--deep)';
+    setTimeout(() => {
+      closeModal();
+      submitBtn.textContent = 'Create profile →';
+      submitBtn.style.background = '';
+      submitBtn.disabled = false;
+    }, 1800);
+  } catch (err) {
+    submitBtn.textContent = 'Connection error — retry';
+    submitBtn.style.background = 'var(--slate)';
     submitBtn.disabled = false;
-  }, 1800);
+    setTimeout(() => {
+      submitBtn.textContent = 'Create profile →';
+      submitBtn.style.background = '';
+    }, 3000);
+  }
 });
 </script>
 </body>
