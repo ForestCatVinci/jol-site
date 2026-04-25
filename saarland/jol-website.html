@@ -1033,7 +1033,7 @@
     <div class="cta-pre">Begin your journey</div>
     <h2 class="cta-title">Your path starts<br>with one <em>question</em></h2>
     <p class="cta-sub">Free for all students. No credit card. No catch.<br>Just honest guidance in your language.</p>
-    <a href="jol-signup.html" class="btn-primary" style="display:inline-block;margin-top:8px;">Sign up</a>
+    <button class="btn-primary" id="openModalCta" style="margin-top:8px;">Sign up</button>
   </div>
 </section>
 
@@ -1412,6 +1412,7 @@ function closeModal() {
 }
 
 openBtn.addEventListener('click', openModal);
+document.getElementById('openModalCta').addEventListener('click', openModal);
 closeBtn.addEventListener('click', closeModal);
 overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
