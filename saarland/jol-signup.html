@@ -446,9 +446,7 @@ document.getElementById('submitBtn').addEventListener('click', () => {
   btn.disabled = true;
 
   setTimeout(() => {
-    document.getElementById('formState').style.display = 'none';
-    const s = document.getElementById('successState');
-    s.style.display = 'flex';
+    window.location.href = 'jol-next.html';
   }, 900);
 });
 </script>
