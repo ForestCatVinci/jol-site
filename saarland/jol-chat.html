@@ -751,8 +751,12 @@ const WEBHOOK_URL = 'https://multistory-jackelyn-aggadic.ngrok-free.dev/webhook-
 
 // Per-page-load session ID for conversation threading
 const sessionId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
-// Persistent user ID across devices (set at sign-up / sign-in)
-const user_id = localStorage.getItem('jol_user_id') || null;
+// Persistent user ID — use existing one or generate a new anonymous one
+let user_id = localStorage.getItem('jol_user_id');
+if (!user_id) {
+  user_id = crypto.randomUUID ? crypto.randomUUID() : 'anon-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+  localStorage.setItem('jol_user_id', user_id);
+}
 
 let isWaiting = false;
 
