@@ -1253,6 +1253,9 @@
       <button class="modal-close" id="closeSignIn" aria-label="Close">✕</button>
     </div>
     <div class="modal-body">
+      <div id="signinBanner" style="display:none;padding:10px 14px;border:1px solid var(--mist);background:var(--ice);font-size:11px;color:var(--deep);letter-spacing:0.04em;margin-bottom:4px;">
+        You already have an account — enter your e-mail to sign in.
+      </div>
       <div class="modal-grid">
         <div class="form-field full">
           <label class="field-label" for="si-email">E-mail</label>
@@ -1431,6 +1434,7 @@ function openSignIn() {
 function closeSignIn() {
   signinOverlay.classList.remove('open');
   document.body.style.overflow = '';
+  document.getElementById('signinBanner').style.display = 'none';
 }
 
 document.getElementById('openSignIn').addEventListener('click', openSignIn);
@@ -1511,16 +1515,29 @@ submitBtn.addEventListener('click', async () => {
   submitBtn.disabled = true;
 
   try {
-    await fetch('http://localhost:5678/webhook-test/1307025e-4ce7-4064-af7d-ec4ac8b4162c', {
+    const res  = await fetch('http://localhost:5678/webhook-test/1307025e-4ce7-4064-af7d-ec4ac8b4162c', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, email, telegram, grade, region, income })
     });
-    submitBtn.textContent = 'Profile created ✓';
-    submitBtn.style.background = 'var(--deep)';
-    setTimeout(() => {
-      window.location.href = 'jol-next.html';
-    }, 1000);
+    const data = await res.json().catch(() => ({}));
+
+    if (data.status === 'old_created') {
+      // User already exists — switch to sign-in modal with notice
+      submitBtn.textContent = 'Create profile →';
+      submitBtn.style.background = '';
+      submitBtn.disabled = false;
+      closeModal();
+      document.getElementById('si-email').value = email;
+      document.getElementById('signinBanner').style.display = 'block';
+      openSignIn();
+    } else {
+      submitBtn.textContent = 'Profile created ✓';
+      submitBtn.style.background = 'var(--deep)';
+      setTimeout(() => {
+        window.location.href = 'jol-next.html';
+      }, 1000);
+    }
   } catch (err) {
     submitBtn.textContent = 'Connection error — retry';
     submitBtn.style.background = 'var(--slate)';
