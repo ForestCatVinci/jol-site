@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Жол — Sign up</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ice: #0B1017;
+    --frost: #101820;
+    --mist: #1A2B39;
+    --slate: #4A6579;
+    --deep: #7299AF;
+    --ink: #C5D8E8;
+    --white: #0E1822;
+    --glass: rgba(11,16,23,0.6);
+    --glass-border: rgba(26,43,57,0.6);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    min-height: 100%;
+    font-family: 'DM Mono', monospace;
+    background: var(--ice);
+    color: var(--ink);
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed;
+    width: 8px; height: 8px;
+    background: var(--deep);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: width 0.2s, height 0.2s, background 0.2s;
+  }
+  .cursor-ring {
+    position: fixed;
+    width: 32px; height: 32px;
+    border: 1px solid var(--mist);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: width 0.25s, height 0.25s, border-color 0.2s;
+  }
+  body:has(a:hover) .cursor-ring,
+  body:has(button:hover) .cursor-ring { width: 48px; height: 48px; border-color: var(--deep); }
+
+  /* Snow */
+  .snow-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.35;
+  }
+
+  /* Nav */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 48px;
+    background: rgba(11,16,23,0.88);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--glass-border);
+  }
+  .nav-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .nav-logo span { font-style: italic; color: var(--slate); }
+  .back-link {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--slate);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s;
+  }
+  .back-link::before { content: '←'; }
+  .back-link:hover { color: var(--ink); }
+
+  /* Page layout */
+  .page {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 24px 60px;
+  }
+
+  /* Card */
+  .card {
+    width: 100%;
+    max-width: 540px;
+    background: var(--white);
+    border: 1px solid var(--glass-border);
+  }
+
+  .card-head {
+    padding: 36px 40px 28px;
+    border-bottom: 1px solid var(--mist);
+  }
+  .card-eyebrow {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-eyebrow::before {
+    content: '';
+    display: block;
+    width: 20px; height: 1px;
+    background: var(--mist);
+  }
+  .card-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 34px;
+    font-weight: 300;
+    color: var(--ink);
+    line-height: 1.1;
+  }
+  .card-title em { font-style: italic; color: var(--slate); }
+  .card-sub {
+    font-size: 11px;
+    color: var(--slate);
+    line-height: 1.75;
+    font-weight: 300;
+    margin-top: 10px;
+  }
+
+  .card-body {
+    padding: 32px 40px 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .form-field.full { grid-column: 1 / -1; }
+
+  .field-label {
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--slate);
+  }
+  .field-hint {
+    font-size: 9px;
+    color: var(--mist);
+    letter-spacing: 0.06em;
+    margin-top: -4px;
+  }
+
+  .field-input {
+    background: var(--ice);
+    border: 1px solid var(--mist);
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    outline: none;
+    padding: 10px 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--ink);
+    font-weight: 300;
+    transition: border-color 0.2s;
+    width: 100%;
+    border-bottom: 1px solid var(--mist);
+  }
+  .field-input::placeholder { color: var(--slate); opacity: 0.45; }
+  .field-input:focus { border-bottom-color: var(--deep); }
+
+  .divider {
+    height: 1px;
+    background: var(--mist);
+    margin: 0 -40px;
+    width: calc(100% + 80px);
+  }
+
+  .submit-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--ink);
+    color: var(--frost);
+    border: none;
+    padding: 16px;
+    width: 100%;
+    cursor: none;
+    transition: background 0.2s;
+    margin-top: 2px;
+  }
+  .submit-btn:hover { background: var(--deep); }
+  .submit-btn:disabled { background: var(--mist); color: var(--slate); }
+
+  .form-note {
+    font-size: 10px;
+    color: var(--slate);
+    text-align: center;
+    letter-spacing: 0.06em;
+    margin-top: -8px;
+  }
+  .form-note a {
+    color: var(--deep);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .form-note a:hover { color: var(--ink); }
+
+  /* Success state */
+  .success-state {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 56px 40px;
+    gap: 16px;
+  }
+  .success-mark {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 56px;
+    font-weight: 300;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .success-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 300;
+    color: var(--ink);
+  }
+  .success-sub {
+    font-size: 11px;
+    color: var(--slate);
+    line-height: 1.8;
+    font-weight: 300;
+    max-width: 340px;
+  }
+  .success-link {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--deep);
+    text-decoration: none;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s;
+  }
+  .success-link::after { content: '→'; transition: transform 0.2s; }
+  .success-link:hover { color: var(--ink); }
+  .success-link:hover::after { transform: translateX(4px); }
+
+  @media (max-width: 600px) {
+    nav { padding: 16px 20px; }
+    .card-head { padding: 28px 24px 22px; }
+    .card-body { padding: 24px 24px 28px; }
+    .field-row { grid-template-columns: 1fr; }
+    .divider { margin: 0 -24px; width: calc(100% + 48px); }
+    .success-state { padding: 40px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas class="snow-canvas" id="snow"></canvas>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<nav>
+  <a href="jol-website.html" class="nav-logo">Жол <span>/ path</span></a>
+  <a href="jol-website.html" class="back-link">Back</a>
+</nav>
+
+<div class="page">
+  <div class="card">
+
+    <!-- Form state -->
+    <div id="formState">
+      <div class="card-head">
+        <div class="card-eyebrow">Free · No credit card</div>
+        <div class="card-title">Create your <em>account</em></div>
+        <div class="card-sub">Tell us a bit about yourself so Жол can personalise your path from day one.</div>
+      </div>
+
+      <div class="card-body">
+
+        <div class="field-row">
+          <div class="form-field">
+            <label class="field-label" for="f-name">Name</label>
+            <input class="field-input" id="f-name" type="text" placeholder="Aigеrim" autocomplete="given-name">
+          </div>
+          <div class="form-field">
+            <label class="field-label" for="f-surname">Surname</label>
+            <input class="field-input" id="f-surname" type="text" placeholder="Dzhaksybekova" autocomplete="family-name">
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="field-label" for="f-email">E-mail</label>
+          <input class="field-input" id="f-email" type="email" placeholder="you@mail.kz" autocomplete="email">
+        </div>
+
+        <div class="form-field">
+          <label class="field-label" for="f-telegram">Telegram username</label>
+          <div class="field-hint">We'll send updates and reminders here</div>
+          <input class="field-input" id="f-telegram" type="text" placeholder="@username">
+        </div>
+
+        <div class="form-field">
+          <label class="field-label" for="f-geo">Geographical position</label>
+          <div class="field-hint">City, village, or region — whatever feels right</div>
+          <input class="field-input" id="f-geo" type="text" placeholder="e.g. Shayan village, Turkestan region">
+        </div>
+
+        <div class="form-field">
+          <label class="field-label" for="f-income">Parent monthly income</label>
+          <div class="field-hint">Helps us find grants you actually qualify for</div>
+          <input class="field-input" id="f-income" type="text" placeholder="e.g. 150 000 ₸ or below minimum wage">
+        </div>
+
+        <div class="divider"></div>
+
+        <button class="submit-btn" id="submitBtn">Create account →</button>
+        <div class="form-note">
+          Already have an account? <a href="#">Sign in</a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Success state -->
+    <div class="success-state" id="successState">
+      <div class="success-mark">Ж</div>
+      <div class="success-title">You're on the path</div>
+      <div class="success-sub">Your profile has been created. Жол will use your details to build a personalised roadmap — check your e-mail to get started.</div>
+      <a href="jol-chat.html" class="success-link">Start your first conversation</a>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Cursor
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+});
+function animRing() {
+  rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+  ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+  requestAnimationFrame(animRing);
+}
+animRing();
+
+// Snow
+const canvas = document.getElementById('snow');
+const ctx = canvas.getContext('2d');
+function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+const flakes = Array.from({length: 45}, () => ({
+  x: Math.random() * canvas.width,
+  y: Math.random() * canvas.height,
+  r: Math.random() * 2.5 + 0.5,
+  speed: Math.random() * 0.5 + 0.15,
+  drift: Math.random() * 0.25 - 0.12,
+  opacity: Math.random() * 0.4 + 0.08
+}));
+function drawSnow() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  flakes.forEach(f => {
+    ctx.beginPath();
+    ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(100,130,160,${f.opacity})`;
+    ctx.fill();
+    f.y += f.speed; f.x += f.drift;
+    if (f.y > canvas.height) { f.y = -5; f.x = Math.random() * canvas.width; }
+    if (f.x > canvas.width) f.x = 0;
+    if (f.x < 0) f.x = canvas.width;
+  });
+  requestAnimationFrame(drawSnow);
+}
+drawSnow();
+
+// Form submit
+document.getElementById('submitBtn').addEventListener('click', () => {
+  const name    = document.getElementById('f-name').value.trim();
+  const surname = document.getElementById('f-surname').value.trim();
+  const email   = document.getElementById('f-email').value.trim();
+  const geo     = document.getElementById('f-geo').value.trim();
+  const btn     = document.getElementById('submitBtn');
+
+  if (!name || !surname || !email || !geo) {
+    btn.textContent = 'Please fill required fields';
+    btn.style.background = 'var(--slate)';
+    setTimeout(() => {
+      btn.textContent = 'Create account →';
+      btn.style.background = '';
+    }, 2000);
+    return;
+  }
+
+  btn.textContent = 'Creating…';
+  btn.disabled = true;
+
+  setTimeout(() => {
+    document.getElementById('formState').style.display = 'none';
+    const s = document.getElementById('successState');
+    s.style.display = 'flex';
+  }, 900);
+});
+</script>
+</body>
+</html>
