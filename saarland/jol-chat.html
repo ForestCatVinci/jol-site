@@ -749,8 +749,10 @@ function fillPrompt(text) {
 
 const WEBHOOK_URL = 'https://multistory-jackelyn-aggadic.ngrok-free.dev/webhook-test/5c8d5ff3-42be-49ef-90cd-d14073ee6024';
 
-// Unique session ID per page load for conversation context
+// Per-page-load session ID for conversation threading
 const sessionId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
+// Persistent user ID across devices (set at sign-up / sign-in)
+const user_id = localStorage.getItem('jol_user_id') || null;
 
 let isWaiting = false;
 
@@ -771,7 +773,7 @@ async function send() {
     const res = await fetch(WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
-      body: JSON.stringify({ chatInput: text, sessionId })
+      body: JSON.stringify({ chatInput: text, sessionId, user_id })
     });
 
     const data = await res.json();

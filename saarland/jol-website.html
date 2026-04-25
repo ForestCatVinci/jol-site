@@ -1452,11 +1452,13 @@ signinSubmit.addEventListener('click', async () => {
   signinSubmit.textContent = 'Sending…';
   signinSubmit.disabled = true;
   try {
-    await fetch('https://multistory-jackelyn-aggadic.ngrok-free.dev/webhook-test/50f7b0a7-386e-47e3-9346-36c1838b6018', {
+    const siRes  = await fetch('https://multistory-jackelyn-aggadic.ngrok-free.dev/webhook-test/50f7b0a7-386e-47e3-9346-36c1838b6018', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
       body: JSON.stringify({ email })
     });
+    const siData = await siRes.json().catch(() => ({}));
+    if (siData.user_id) localStorage.setItem('jol_user_id', siData.user_id);
     signinSubmit.textContent = 'Link sent ✓';
     signinSubmit.style.background = 'var(--deep)';
     setTimeout(() => {
@@ -1514,11 +1516,14 @@ submitBtn.addEventListener('click', async () => {
   submitBtn.textContent = 'Sending…';
   submitBtn.disabled = true;
 
+  const user_id = crypto.randomUUID ? crypto.randomUUID() : 'uid-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+  localStorage.setItem('jol_user_id', user_id);
+
   try {
     const res  = await fetch('https://multistory-jackelyn-aggadic.ngrok-free.dev/webhook-test/1307025e-4ce7-4064-af7d-ec4ac8b4162c', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
-      body: JSON.stringify({ username, email, telegram, grade, region, income })
+      body: JSON.stringify({ username, email, telegram, grade, region, income, user_id })
     });
     const data = await res.json().catch(() => ({}));
 
