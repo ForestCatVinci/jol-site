@@ -1489,7 +1489,7 @@ submitBtn.addEventListener('click', async () => {
   submitBtn.disabled = true;
 
   try {
-    await fetch('http://localhost:5678/webhook/1307025e-4ce7-4064-af7d-ec4ac8b4162c', {
+    await fetch('http://localhost:5678/webhook-test/1307025e-4ce7-4064-af7d-ec4ac8b4162c', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, email, telegram, grade, region, income })
