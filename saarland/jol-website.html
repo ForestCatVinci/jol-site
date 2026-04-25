@@ -5,7 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Жол — Your path starts here</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+  @font-face {
+    font-family: 'Aeonik';
+    src: local('Aeonik'), local('Aeonik-Regular');
+    font-weight: 400;
+  }
+  @font-face {
+    font-family: 'Aeonik';
+    src: local('Aeonik Light'), local('Aeonik-Light');
+    font-weight: 300;
+  }
+  :root {
+    --font-display: 'Oswald', sans-serif;
+    --font-body: 'Aeonik', ui-rounded, 'SF Pro Rounded', system-ui, -apple-system, sans-serif;
+  }
+</style>
 <style>
   :root {
     --ice: #0B1017;
@@ -24,7 +41,7 @@
   html { scroll-behavior: smooth; }
 
   body {
-    font-family: 'DM Mono', monospace;
+    font-family: var(--font-body);
     background: var(--ice);
     color: var(--ink);
     overflow-x: hidden;
@@ -79,7 +96,7 @@
     border-bottom: 1px solid var(--glass-border);
   }
   .nav-logo {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-display);
     font-size: 22px;
     font-weight: 400;
     letter-spacing: 0.08em;
@@ -155,7 +172,7 @@
     background: var(--mist);
   }
   .hero-title {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-display);
     font-size: clamp(52px, 6vw, 86px);
     font-weight: 300;
     line-height: 1.05;
@@ -180,7 +197,7 @@
     gap: 24px;
   }
   .btn-primary {
-    font-family: 'DM Mono', monospace;
+    font-family: var(--font-body);
     font-size: 11px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -243,7 +260,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-display);
     font-size: 12px;
     color: var(--deep);
   }
@@ -282,7 +299,7 @@
     background: var(--frost);
     border-radius: 50%;
     flex-shrink: 0;
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-display);
     font-size: 10px;
     color: var(--slate);
     display: flex;
@@ -337,7 +354,7 @@
     background: none;
     border: none;
     outline: none;
-    font-family: 'DM Mono', monospace;
+    font-family: var(--font-body);
     font-size: 11px;
     color: var(--ink);
     font-weight: 300;
@@ -371,7 +388,7 @@
     50% { transform: translateY(-6px); }
   }
   .stat-num {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-display);
     font-size: 24px;
     font-weight: 300;
     color: var(--ink);
@@ -412,7 +429,7 @@
     display: block;
   }
   .section-title {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-display);
     font-size: clamp(36px, 4vw, 56px);
     font-weight: 300;
     color: var(--ink);
@@ -435,7 +452,7 @@
   }
   .step:hover { background: var(--ice); }
   .step-num {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-display);
     font-size: 48px;
     font-weight: 300;
     color: var(--frost);
@@ -496,7 +513,7 @@
     font-size: 14px;
     flex-shrink: 0;
     color: var(--deep);
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-display);
   }
   .feat-content { flex: 1; }
   .feat-name {
@@ -599,7 +616,7 @@
     text-align: center;
   }
   .stat-big {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-display);
     font-size: 52px;
     font-weight: 300;
     color: var(--ink);
@@ -630,7 +647,7 @@
   }
   .testimonial:hover { border-color: var(--mist); }
   .quote-mark {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-display);
     font-size: 60px;
     color: var(--frost);
     line-height: 1;
@@ -644,7 +661,7 @@
     font-weight: 300;
     margin-bottom: 24px;
     font-style: italic;
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-display);
     font-size: 16px;
   }
   .quote-author {
@@ -658,7 +675,7 @@
     width: 32px; height: 32px;
     background: var(--mist);
     border-radius: 50%;
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-display);
     font-size: 12px;
     color: var(--white);
     display: flex;
@@ -684,7 +701,7 @@
     margin-bottom: 24px;
   }
   .cta-title {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-display);
     font-size: clamp(40px, 5vw, 64px);
     font-weight: 300;
     color: var(--ink);
@@ -714,7 +731,7 @@
     margin-bottom: 48px;
   }
   .footer-logo {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-display);
     font-size: 24px;
     font-weight: 300;
     color: var(--ink);
@@ -841,7 +858,7 @@
     gap: 16px;
   }
   .modal-title {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-display);
     font-size: 28px;
     font-weight: 300;
     color: var(--ink);
@@ -868,7 +885,7 @@
     flex-shrink: 0;
     transition: all 0.2s;
     line-height: 1;
-    font-family: 'DM Mono', monospace;
+    font-family: var(--font-body);
   }
   .modal-close:hover { border-color: var(--ink); color: var(--ink); }
   .modal-body {
@@ -899,7 +916,7 @@
     border: 1px solid var(--mist);
     outline: none;
     padding: 10px 14px;
-    font-family: 'DM Mono', monospace;
+    font-family: var(--font-body);
     font-size: 11px;
     color: var(--ink);
     font-weight: 300;
@@ -916,7 +933,7 @@
     width: calc(100% + 64px);
   }
   .modal-submit {
-    font-family: 'DM Mono', monospace;
+    font-family: var(--font-body);
     font-size: 11px;
     letter-spacing: 0.1em;
     text-transform: uppercase;

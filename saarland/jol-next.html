@@ -5,7 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Жол — You're in</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+  @font-face { font-family: 'Aeonik'; src: local('Aeonik'), local('Aeonik-Regular'); font-weight: 400; }
+  @font-face { font-family: 'Aeonik'; src: local('Aeonik Light'), local('Aeonik-Light'); font-weight: 300; }
+  :root {
+    --font-display: 'Oswald', sans-serif;
+    --font-body: 'Aeonik', ui-rounded, 'SF Pro Rounded', system-ui, -apple-system, sans-serif;
+  }
+</style>
 <style>
   :root {
     --ice: #0B1017;
@@ -22,7 +31,7 @@
 
   html, body {
     height: 100%;
-    font-family: 'DM Mono', monospace;
+    font-family: var(--font-body);
     background: var(--ice);
     color: var(--ink);
     cursor: none;
@@ -70,7 +79,7 @@
     border-bottom: 1px solid var(--glass-border);
   }
   .nav-logo {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-display);
     font-size: 20px;
     font-weight: 400;
     letter-spacing: 0.08em;
@@ -105,7 +114,7 @@
   }
 
   .mark {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-display);
     font-size: 64px;
     font-weight: 300;
     color: var(--ink);
@@ -132,7 +141,7 @@
   }
 
   .headline {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-display);
     font-size: clamp(30px, 5vw, 42px);
     font-weight: 300;
     color: var(--ink);
@@ -158,7 +167,7 @@
   }
 
   .btn-primary {
-    font-family: 'DM Mono', monospace;
+    font-family: var(--font-body);
     font-size: 11px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -178,7 +187,7 @@
   .btn-primary .btn-icon { font-size: 14px; }
 
   .btn-secondary {
-    font-family: 'DM Mono', monospace;
+    font-family: var(--font-body);
     font-size: 11px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
