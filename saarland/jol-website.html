@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Жол — Your path starts here</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ice: #0B1017;
+    --frost: #101820;
+    --mist: #1A2B39;
+    --slate: #4A6579;
+    --deep: #7299AF;
+    --ink: #C5D8E8;
+    --white: #0E1822;
+    --glass: rgba(11,16,23,0.6);
+    --glass-border: rgba(26,43,57,0.6);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Mono', monospace;
+    background: var(--ice);
+    color: var(--ink);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed;
+    width: 8px; height: 8px;
+    background: var(--deep);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s, width 0.2s, height 0.2s, background 0.2s;
+  }
+  .cursor-ring {
+    position: fixed;
+    width: 32px; height: 32px;
+    border: 1px solid var(--mist);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.12s ease-out, width 0.25s, height 0.25s, border-color 0.2s;
+  }
+  body:has(a:hover) .cursor-ring,
+  body:has(button:hover) .cursor-ring { width: 48px; height: 48px; border-color: var(--deep); }
+
+  /* Snowflakes */
+  .snow-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 48px;
+    background: rgba(11,16,23,0.88);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--glass-border);
+  }
+  .nav-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .nav-logo span { font-style: italic; color: var(--slate); }
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    list-style: none;
+  }
+  .nav-links a {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--slate);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-cta {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: none;
+    border: 1px solid var(--mist);
+    padding: 10px 22px;
+    cursor: none;
+    transition: all 0.25s;
+  }
+  .nav-cta:hover {
+    background: var(--ink);
+    color: var(--frost);
+    border-color: var(--ink);
+  }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 120px 48px 80px;
+    z-index: 1;
+  }
+  .hero-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+  .hero-left { }
+  .hero-eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 1px;
+    background: var(--mist);
+  }
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(52px, 6vw, 86px);
+    font-weight: 300;
+    line-height: 1.05;
+    color: var(--ink);
+    margin-bottom: 28px;
+  }
+  .hero-title em {
+    font-style: italic;
+    color: var(--slate);
+  }
+  .hero-desc {
+    font-size: 12px;
+    line-height: 1.9;
+    color: var(--deep);
+    max-width: 400px;
+    margin-bottom: 44px;
+    font-weight: 300;
+  }
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .btn-primary {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--frost);
+    background: var(--ink);
+    border: none;
+    padding: 16px 32px;
+    cursor: none;
+    transition: all 0.25s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-primary:hover {
+    background: var(--deep);
+  }
+  .btn-ghost {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--slate);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.2s;
+  }
+  .btn-ghost:hover { color: var(--ink); }
+  .btn-ghost::after {
+    content: '→';
+    transition: transform 0.2s;
+  }
+  .btn-ghost:hover::after { transform: translateX(4px); }
+
+  /* Hero right — chat preview */
+  .hero-right {
+    position: relative;
+  }
+  .chat-card {
+    background: var(--white);
+    border: 1px solid var(--glass-border);
+    overflow: hidden;
+    animation: floatCard 6s ease-in-out infinite;
+  }
+  @keyframes floatCard {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+  }
+  .chat-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--frost);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--ice);
+  }
+  .chat-avatar {
+    width: 28px; height: 28px;
+    background: var(--mist);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 12px;
+    color: var(--deep);
+  }
+  .chat-name {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--ink);
+  }
+  .chat-status {
+    font-size: 10px;
+    color: var(--slate);
+    margin-top: 1px;
+  }
+  .online-dot {
+    width: 6px; height: 6px;
+    background: var(--deep);
+    border-radius: 50%;
+    margin-left: auto;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .chat-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-height: 280px;
+  }
+  .msg { display: flex; gap: 10px; align-items: flex-start; }
+  .msg.user { flex-direction: row-reverse; }
+  .msg-avatar {
+    width: 24px; height: 24px;
+    background: var(--frost);
+    border-radius: 50%;
+    flex-shrink: 0;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 10px;
+    color: var(--slate);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .msg.user .msg-avatar { background: var(--mist); }
+  .bubble {
+    max-width: 75%;
+    padding: 10px 14px;
+    font-size: 11px;
+    line-height: 1.7;
+    font-weight: 300;
+  }
+  .msg.bot .bubble {
+    background: var(--ice);
+    border: 1px solid var(--frost);
+    color: var(--ink);
+  }
+  .msg.user .bubble {
+    background: var(--ink);
+    color: var(--frost);
+    text-align: right;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+    padding-left: 34px;
+  }
+  .chip {
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    padding: 5px 12px;
+    border: 1px solid var(--mist);
+    color: var(--deep);
+    background: none;
+    cursor: none;
+    transition: all 0.2s;
+  }
+  .chip:hover { background: var(--ink); color: var(--frost); border-color: var(--ink); }
+  .chat-input {
+    padding: 14px 20px;
+    border-top: 1px solid var(--frost);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .chat-input input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--ink);
+    font-weight: 300;
+  }
+  .chat-input input::placeholder { color: var(--mist); }
+  .send-btn {
+    font-size: 14px;
+    color: var(--slate);
+    background: none;
+    border: none;
+    cursor: none;
+    transition: color 0.2s;
+    line-height: 1;
+  }
+  .send-btn:hover { color: var(--ink); }
+
+  /* Floating stats */
+  .stat-float {
+    position: absolute;
+    background: var(--white);
+    border: 1px solid var(--glass-border);
+    padding: 12px 16px;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    animation: floatStat 8s ease-in-out infinite;
+  }
+  .stat-float:nth-child(2) { top: -20px; right: -24px; animation-delay: -2s; }
+  .stat-float:nth-child(3) { bottom: 40px; left: -32px; animation-delay: -4s; }
+  @keyframes floatStat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-6px); }
+  }
+  .stat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-weight: 300;
+    color: var(--ink);
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+  .stat-label { color: var(--slate); }
+
+  /* SECTION COMMON */
+  section { position: relative; z-index: 1; }
+  .section-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  /* HOW IT WORKS */
+  .how {
+    padding: 120px 0;
+    background: var(--white);
+    border-top: 1px solid var(--frost);
+    border-bottom: 1px solid var(--frost);
+  }
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::before {
+    content: '';
+    width: 24px; height: 1px;
+    background: var(--mist);
+    display: block;
+  }
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 4vw, 56px);
+    font-weight: 300;
+    color: var(--ink);
+    line-height: 1.1;
+    margin-bottom: 64px;
+  }
+  .section-title em { font-style: italic; color: var(--slate); }
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--frost);
+    border: 1px solid var(--frost);
+  }
+  .step {
+    background: var(--white);
+    padding: 40px 32px;
+    position: relative;
+    transition: background 0.3s;
+  }
+  .step:hover { background: var(--ice); }
+  .step-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 48px;
+    font-weight: 300;
+    color: var(--frost);
+    line-height: 1;
+    margin-bottom: 24px;
+    transition: color 0.3s;
+  }
+  .step:hover .step-num { color: var(--mist); }
+  .step-title {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: 12px;
+  }
+  .step-desc {
+    font-size: 11px;
+    line-height: 1.8;
+    color: var(--slate);
+    font-weight: 300;
+  }
+
+  /* FEATURES */
+  .features { padding: 120px 0; }
+  .features-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+  .features-left { }
+  .feature-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid var(--frost);
+  }
+  .feature-item {
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--frost);
+    cursor: none;
+    transition: background 0.2s;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .feature-item:last-child { border-bottom: none; }
+  .feature-item:hover { background: var(--white); }
+  .feature-item.active { background: var(--white); }
+  .feat-icon {
+    width: 36px; height: 36px;
+    background: var(--frost);
+    border: 1px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    color: var(--deep);
+    font-family: 'Cormorant Garamond', serif;
+  }
+  .feat-content { flex: 1; }
+  .feat-name {
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+    margin-bottom: 5px;
+  }
+  .feat-text {
+    font-size: 11px;
+    color: var(--slate);
+    line-height: 1.7;
+    font-weight: 300;
+  }
+  .features-right {
+    position: relative;
+  }
+  /* Plan preview card */
+  .plan-preview {
+    background: var(--white);
+    border: 1px solid var(--glass-border);
+    overflow: hidden;
+  }
+  .plan-header {
+    background: var(--ice);
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--frost);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .plan-tabs {
+    display: flex;
+    gap: 0;
+  }
+  .plan-tab {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    color: var(--slate);
+    border: 1px solid var(--frost);
+    background: none;
+    cursor: none;
+    margin-right: -1px;
+    transition: all 0.2s;
+  }
+  .plan-tab.active {
+    background: var(--ink);
+    color: var(--frost);
+    border-color: var(--ink);
+    z-index: 1;
+  }
+  .plan-body { padding: 24px; }
+  .plan-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--frost);
+    font-size: 11px;
+    font-weight: 300;
+  }
+  .plan-row:last-child { border-bottom: none; }
+  .plan-month {
+    font-size: 10px;
+    color: var(--slate);
+    min-width: 56px;
+    letter-spacing: 0.06em;
+  }
+  .plan-task {
+    flex: 1;
+    color: var(--ink);
+  }
+  .plan-badge {
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    padding: 3px 8px;
+    text-transform: uppercase;
+  }
+  .badge-done { background: var(--frost); color: var(--deep); }
+  .badge-soon { background: var(--mist); color: var(--white); }
+  .badge-open { border: 1px solid var(--frost); color: var(--slate); }
+
+  /* STATS BAND */
+  .stats-band {
+    padding: 80px 0;
+    background: #060C14;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: rgba(255,255,255,0.04);
+  }
+  .stat-block {
+    background: #060C14;
+    padding: 40px 32px;
+    text-align: center;
+  }
+  .stat-big {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 52px;
+    font-weight: 300;
+    color: var(--ink);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .stat-desc {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--slate);
+  }
+
+  /* TESTIMONIALS */
+  .testimonials { padding: 120px 0; }
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 64px;
+  }
+  .testimonial {
+    background: var(--white);
+    border: 1px solid var(--glass-border);
+    padding: 32px;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .testimonial:hover { border-color: var(--mist); }
+  .quote-mark {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 60px;
+    color: var(--frost);
+    line-height: 1;
+    margin-bottom: 16px;
+    font-style: italic;
+  }
+  .quote-text {
+    font-size: 12px;
+    line-height: 1.85;
+    color: var(--deep);
+    font-weight: 300;
+    margin-bottom: 24px;
+    font-style: italic;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+  }
+  .quote-author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-top: 20px;
+    border-top: 1px solid var(--frost);
+  }
+  .author-avatar {
+    width: 32px; height: 32px;
+    background: var(--mist);
+    border-radius: 50%;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 12px;
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .author-name { font-size: 11px; color: var(--ink); letter-spacing: 0.04em; }
+  .author-meta { font-size: 10px; color: var(--slate); margin-top: 1px; }
+
+  /* CTA */
+  .cta-section {
+    padding: 120px 0;
+    background: var(--white);
+    border-top: 1px solid var(--frost);
+    text-align: center;
+  }
+  .cta-section .section-inner { max-width: 680px; }
+  .cta-pre {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-bottom: 24px;
+  }
+  .cta-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(40px, 5vw, 64px);
+    font-weight: 300;
+    color: var(--ink);
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+  .cta-title em { font-style: italic; color: var(--slate); }
+  .cta-sub {
+    font-size: 12px;
+    color: var(--slate);
+    line-height: 1.8;
+    margin-bottom: 44px;
+    font-weight: 300;
+  }
+  .cta-form {
+    display: flex;
+    gap: 0;
+    max-width: 440px;
+    margin: 0 auto 20px;
+    border: 1px solid var(--mist);
+  }
+  .cta-form input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    padding: 14px 18px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--ink);
+    font-weight: 300;
+  }
+  .cta-form input::placeholder { color: var(--mist); }
+  .cta-form button {
+    background: var(--ink);
+    color: var(--frost);
+    border: none;
+    padding: 14px 24px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: none;
+    transition: background 0.2s;
+  }
+  .cta-form button:hover { background: var(--deep); }
+  .cta-note {
+    font-size: 10px;
+    color: var(--mist);
+    letter-spacing: 0.06em;
+  }
+
+  /* FOOTER */
+  footer {
+    background: #060C14;
+    padding: 60px 48px 40px;
+    color: var(--slate);
+  }
+  .footer-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 48px;
+    margin-bottom: 48px;
+  }
+  .footer-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-weight: 300;
+    color: var(--ink);
+    margin-bottom: 12px;
+  }
+  .footer-logo span { font-style: italic; color: var(--slate); }
+  .footer-tagline {
+    font-size: 11px;
+    color: var(--slate);
+    line-height: 1.7;
+    max-width: 240px;
+    font-weight: 300;
+  }
+  .footer-col-title {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--deep);
+    margin-bottom: 16px;
+  }
+  .footer-links { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .footer-links a {
+    font-size: 11px;
+    color: var(--slate);
+    text-decoration: none;
+    transition: color 0.2s;
+    font-weight: 300;
+  }
+  .footer-links a:hover { color: var(--ink); }
+  .footer-bottom {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255,255,255,0.04);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer-copy { font-size: 10px; color: var(--deep); letter-spacing: 0.08em; }
+  .footer-lang {
+    font-size: 10px;
+    color: var(--deep);
+    display: flex;
+    gap: 16px;
+  }
+  .footer-lang a { color: var(--deep); text-decoration: none; transition: color 0.2s; }
+  .footer-lang a:hover { color: var(--ice); }
+
+  /* Reveal animations */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Typing cursor in chat */
+  .typing {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding: 10px 14px;
+    background: var(--ice);
+    border: 1px solid var(--frost);
+    width: fit-content;
+  }
+  .typing span {
+    width: 4px; height: 4px;
+    background: var(--mist);
+    border-radius: 50%;
+    animation: typingDot 1.4s ease-in-out infinite;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typingDot {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+    30% { transform: translateY(-4px); opacity: 1; }
+  }
+
+  /* SIGN-IN MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(6,12,20,0.82);
+    backdrop-filter: blur(6px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .modal {
+    background: var(--white);
+    border: 1px solid var(--glass-border);
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: translateY(16px);
+    transition: transform 0.25s;
+  }
+  .modal-overlay.open .modal {
+    transform: translateY(0);
+  }
+  .modal::-webkit-scrollbar { width: 3px; }
+  .modal::-webkit-scrollbar-track { background: transparent; }
+  .modal::-webkit-scrollbar-thumb { background: var(--mist); }
+  .modal-head {
+    padding: 28px 32px 20px;
+    border-bottom: 1px solid var(--mist);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .modal-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 300;
+    color: var(--ink);
+    line-height: 1.15;
+  }
+  .modal-title em { font-style: italic; color: var(--slate); }
+  .modal-subtitle {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-top: 6px;
+  }
+  .modal-close {
+    background: none;
+    border: 1px solid var(--mist);
+    color: var(--slate);
+    width: 30px; height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    cursor: none;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    line-height: 1;
+    font-family: 'DM Mono', monospace;
+  }
+  .modal-close:hover { border-color: var(--ink); color: var(--ink); }
+  .modal-body {
+    padding: 28px 32px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .form-field.full { grid-column: 1 / -1; }
+  .field-label {
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--slate);
+  }
+  .field-input {
+    background: var(--ice);
+    border: 1px solid var(--mist);
+    outline: none;
+    padding: 10px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--ink);
+    font-weight: 300;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .field-input::placeholder { color: var(--slate); opacity: 0.5; }
+  .field-input:focus { border-color: var(--deep); }
+  select.field-input { cursor: none; appearance: none; background-image: none; }
+  .modal-divider {
+    height: 1px;
+    background: var(--mist);
+    margin: 0 -32px;
+    width: calc(100% + 64px);
+  }
+  .modal-submit {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: var(--ink);
+    color: var(--frost);
+    border: none;
+    padding: 16px;
+    width: 100%;
+    cursor: none;
+    transition: background 0.2s;
+    margin-top: 4px;
+  }
+  .modal-submit:hover { background: var(--deep); }
+  .modal-note {
+    font-size: 10px;
+    color: var(--slate);
+    text-align: center;
+    letter-spacing: 0.06em;
+    margin-top: -8px;
+  }
+
+  @media (max-width: 900px) {
+    nav { padding: 18px 24px; }
+    .nav-links { display: none; }
+    .hero { padding: 100px 24px 60px; }
+    .hero-inner { grid-template-columns: 1fr; gap: 48px; }
+    .section-inner { padding: 0 24px; }
+    .steps-grid { grid-template-columns: 1fr 1fr; }
+    .features-grid { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .testimonials-grid { grid-template-columns: 1fr; }
+    .footer-inner { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<canvas class="snow-canvas" id="snow"></canvas>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">Жол <span>/ Жол</span></a>
+  <ul class="nav-links">
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#kz">Қазақша</a></li>
+  </ul>
+  <button class="nav-cta" id="openModal">Sign in</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-left reveal">
+      <div class="hero-eyebrow">For students across Kazakhstan</div>
+      <h1 class="hero-title">
+        Your path<br>from village<br>to <em>career</em>
+      </h1>
+      <p class="hero-desc">
+        An AI advisor that speaks your language — Kazakh or Russian — 
+        and builds your personal roadmap to university, funding, and first job. 
+        Based on where you are and what you have.
+      </p>
+      <div class="hero-actions">
+        <a href="jol-chat.html" class="btn-primary">Let's chat</a>
+        <a href="#how" class="btn-ghost">See how it works</a>
+      </div>
+    </div>
+    <div class="hero-right reveal" style="transition-delay:0.2s">
+
+      <div class="stat-float">
+        <div class="stat-num">54k</div>
+        <div class="stat-label">Grants available yearly</div>
+      </div>
+
+      <div class="chat-card">
+        <div class="chat-header">
+          <div class="chat-avatar">Ж</div>
+          <div>
+            <div class="chat-name">Жол — your advisor</div>
+            <div class="chat-status">Қазақша · Русский</div>
+          </div>
+          <div class="online-dot"></div>
+        </div>
+        <div class="chat-body">
+          <div class="msg bot">
+            <div class="msg-avatar">Ж</div>
+            <div>
+              <div class="bubble">Сәлем! I'm Жол. Tell me — what subject do you genuinely enjoy at school? Not what you're best at. What actually interests you.</div>
+            </div>
+          </div>
+          <div class="msg user">
+            <div class="msg-avatar">А</div>
+            <div>
+              <div class="bubble">Math and I love figuring out how phones work</div>
+            </div>
+          </div>
+          <div class="msg bot">
+            <div class="msg-avatar">Ж</div>
+            <div>
+              <div class="bubble">That combination points to 3 strong directions for you. And there are 7 grants you qualify for — including ones specific to Turkestan region. Want to see your plan?</div>
+            </div>
+          </div>
+          <div class="chips">
+            <div class="chip">Yes, show my plan</div>
+            <div class="chip">Which grants?</div>
+            <div class="chip">What universities?</div>
+          </div>
+          <div class="msg bot">
+            <div class="msg-avatar">Ж</div>
+            <div class="typing"><span></span><span></span><span></span></div>
+          </div>
+        </div>
+        <div class="chat-input">
+          <input type="text" placeholder="Ask anything about your future...">
+          <button class="send-btn">↑</button>
+        </div>
+      </div>
+
+      <div class="stat-float">
+        <div class="stat-num">2M+</div>
+        <div class="stat-label">Rural students in KZ</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="section-inner">
+    <div class="section-label">Process</div>
+    <h2 class="section-title">Four steps to <em>clarity</em></h2>
+    <div class="steps-grid reveal">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-title">Conversation</div>
+        <div class="step-desc">Tell Жол about your interests, your region, your situation. No forms. No tests with multiple choice. A real dialogue in your language.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-title">Your directions</div>
+        <div class="step-desc">AI matches your profile to 3 career paths — with real salary data, demand trends, and a day-in-the-life for each one.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-title">Funding map</div>
+        <div class="step-desc">Grants you qualify for — filtered by region, specialty, your scores. With deadlines, instructions, and amounts. No guesswork.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-title">Your roadmap</div>
+        <div class="step-desc">A personal month-by-month plan: what to do in 10th grade, when to register for ENT, when to apply for grants. Three visual formats.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="section-inner">
+    <div class="features-grid">
+      <div class="features-left reveal">
+        <div class="section-label">What's inside</div>
+        <h2 class="section-title">Everything in <em>one place</em></h2>
+        <ul class="feature-list">
+          <li class="feature-item active">
+            <div class="feat-icon">I</div>
+            <div class="feat-content">
+              <div class="feat-name">AI advisor — zero hallucinations</div>
+              <div class="feat-text">Facts come from a verified database. ENT scores, grant amounts, deadlines — all sourced, never invented. Every figure shows its source.</div>
+            </div>
+          </li>
+          <li class="feature-item">
+            <div class="feat-icon">II</div>
+            <div class="feat-content">
+              <div class="feat-name">Three plan formats</div>
+              <div class="feat-text">Table view, timeline roadmap, and mind map — all generated from your profile. Download as PDF or share a link.</div>
+            </div>
+          </li>
+          <li class="feature-item">
+            <div class="feat-icon">III</div>
+            <div class="feat-content">
+              <div class="feat-name">Telegram tracking</div>
+              <div class="feat-text">Connect your Telegram — get reminders for deadlines, weekly check-ins, and surprise opportunities matched to your profile.</div>
+            </div>
+          </li>
+          <li class="feature-item">
+            <div class="feat-icon">IV</div>
+            <div class="feat-content">
+              <div class="feat-name">Geo + financial filter</div>
+              <div class="feat-text">Every recommendation is filtered by your region and financial situation. No irrelevant suggestions. Only what's real for you.</div>
+            </div>
+          </li>
+          <li class="feature-item">
+            <div class="feat-icon">V</div>
+            <div class="feat-content">
+              <div class="feat-name">Career ladder</div>
+              <div class="feat-text">See your path from student to first job to 5-year growth — with the skills you need to build at each stage.</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="features-right reveal" style="transition-delay:0.15s">
+        <div class="plan-preview">
+          <div class="plan-header">
+            <div class="plan-tabs">
+              <button class="plan-tab active">Table</button>
+              <button class="plan-tab">Roadmap</button>
+              <button class="plan-tab">Mind map</button>
+            </div>
+          </div>
+          <div class="plan-body">
+            <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--slate);margin-bottom:16px">Aigеrim's plan — IT direction</div>
+            <div class="plan-row">
+              <div class="plan-month">Sep '25</div>
+              <div class="plan-task">Choose ENT subjects — math + informatics</div>
+              <div class="plan-badge badge-done">Done</div>
+            </div>
+            <div class="plan-row">
+              <div class="plan-month">Nov '25</div>
+              <div class="plan-task">Register for regional math olympiad</div>
+              <div class="plan-badge badge-done">Done</div>
+            </div>
+            <div class="plan-row">
+              <div class="plan-month">Jan '26</div>
+              <div class="plan-task">Apply — Turkestan akimat grant</div>
+              <div class="plan-badge badge-soon">15 Mar</div>
+            </div>
+            <div class="plan-row">
+              <div class="plan-month">Apr '26</div>
+              <div class="plan-task">ENT registration opens</div>
+              <div class="plan-badge badge-open">Upcoming</div>
+            </div>
+            <div class="plan-row">
+              <div class="plan-month">Jun '26</div>
+              <div class="plan-task">ENT exam — target: 90+ points</div>
+              <div class="plan-badge badge-open">Upcoming</div>
+            </div>
+            <div class="plan-row">
+              <div class="plan-month">Jul '26</div>
+              <div class="plan-task">Submit documents to IITU / KazNTU</div>
+              <div class="plan-badge badge-open">Upcoming</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats-band">
+  <div class="section-inner">
+    <div class="stats-grid reveal">
+      <div class="stat-block">
+        <div class="stat-big">2M+</div>
+        <div class="stat-desc">Rural students in Kazakhstan</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-big">54k</div>
+        <div class="stat-desc">State grants yearly — many unclaimed</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-big">63%</div>
+        <div class="stat-desc">Students regret their specialty choice</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-big">0</div>
+        <div class="stat-desc">AI advisors built for KZ villages</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials" id="about">
+  <div class="section-inner">
+    <div class="section-label">Early users</div>
+    <h2 class="section-title">What students <em>say</em></h2>
+    <div class="testimonials-grid">
+      <div class="testimonial reveal">
+        <div class="quote-mark">"</div>
+        <div class="quote-text">I thought becoming a programmer was only for people from Almaty. Жол showed me a grant specifically for students from Turkestan region. I didn't know it existed.</div>
+        <div class="quote-author">
+          <div class="author-avatar">АД</div>
+          <div>
+            <div class="author-name">Aigеrim D.</div>
+            <div class="author-meta">Grade 10 · Shayan village, Turkestan</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial reveal" style="transition-delay:0.1s">
+        <div class="quote-mark">"</div>
+        <div class="quote-text">My dad kept saying IT isn't a real job. Жол showed him the actual salary numbers. He changed his mind after reading that. Now he supports me.</div>
+        <div class="quote-author">
+          <div class="author-avatar">НС</div>
+          <div>
+            <div class="author-name">Nurlan S.</div>
+            <div class="author-meta">Grade 11 · Kyzylorda region</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial reveal" style="transition-delay:0.2s">
+        <div class="quote-mark">"</div>
+        <div class="quote-text">Three months before ENT I had no plan. In one conversation the bot gave me a month-by-month schedule. I actually have something to follow now.</div>
+        <div class="quote-author">
+          <div class="author-avatar">ДМ</div>
+          <div>
+            <div class="author-name">Dana M.</div>
+            <div class="author-meta">Grade 11 · Pavlodar region</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="section-inner">
+    <div class="cta-pre">Begin your journey</div>
+    <h2 class="cta-title">Your path starts<br>with one <em>question</em></h2>
+    <p class="cta-sub">Free for all students. No credit card. No catch.<br>Just honest guidance in your language.</p>
+    <div class="cta-form">
+      <input type="email" placeholder="your@email.kz">
+      <button>Get early access</button>
+    </div>
+    <div class="cta-note">or open Telegram and search @JolKZbot</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-logo">Жол <span>/ path</span></div>
+      <div class="footer-tagline">AI career advisor for students across Kazakhstan. Built with care for those who need it most.</div>
+    </div>
+    <div>
+      <div class="footer-col-title">Product</div>
+      <ul class="footer-links">
+        <li><a href="#">How it works</a></li>
+        <li><a href="#">Features</a></li>
+        <li><a href="#">Telegram bot</a></li>
+        <li><a href="#">For schools</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Resources</div>
+      <ul class="footer-links">
+        <li><a href="#">Grant database</a></li>
+        <li><a href="#">University map</a></li>
+        <li><a href="#">ENT guide</a></li>
+        <li><a href="#">Career paths</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Company</div>
+      <ul class="footer-links">
+        <li><a href="#">About</a></li>
+        <li><a href="#">Blog</a></li>
+        <li><a href="#">Contact</a></li>
+        <li><a href="#">Privacy</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2025 Жол. Almaty, Kazakhstan</div>
+    <div class="footer-lang">
+      <a href="#">Қазақша</a>
+      <a href="#">Русский</a>
+      <a href="#">English</a>
+    </div>
+  </div>
+</footer>
+
+<!-- SIGN-IN MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="modalTitle">Create your <em>profile</em></div>
+        <div class="modal-subtitle">Free for all students · Takes 30 seconds</div>
+      </div>
+      <button class="modal-close" id="closeModal" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-grid">
+
+        <div class="form-field">
+          <label class="field-label" for="f-username">Username</label>
+          <input class="field-input" id="f-username" type="text" placeholder="aygul_2026" autocomplete="username">
+        </div>
+
+        <div class="form-field">
+          <label class="field-label" for="f-email">E-mail</label>
+          <input class="field-input" id="f-email" type="email" placeholder="you@mail.kz" autocomplete="email">
+        </div>
+
+        <div class="form-field">
+          <label class="field-label" for="f-telegram">Telegram username</label>
+          <input class="field-input" id="f-telegram" type="text" placeholder="@username">
+        </div>
+
+        <div class="form-field">
+          <label class="field-label" for="f-grade">Grade</label>
+          <select class="field-input" id="f-grade">
+            <option value="" disabled selected>Select grade</option>
+            <option>Grade 8</option>
+            <option>Grade 9</option>
+            <option>Grade 10</option>
+            <option>Grade 11</option>
+            <option>Graduated</option>
+          </select>
+        </div>
+
+        <div class="form-field full">
+          <label class="field-label" for="f-region">Geographical position</label>
+          <select class="field-input" id="f-region">
+            <option value="" disabled selected>Select region</option>
+            <option>Almaty city</option>
+            <option>Astana city</option>
+            <option>Shymkent city</option>
+            <option>Almaty region</option>
+            <option>Turkestan region</option>
+            <option>Kyzylorda region</option>
+            <option>Pavlodar region</option>
+            <option>East Kazakhstan region</option>
+            <option>West Kazakhstan region</option>
+            <option>North Kazakhstan region</option>
+            <option>Kostanay region</option>
+            <option>Karaganda region</option>
+            <option>Aktobe region</option>
+            <option>Atyrau region</option>
+            <option>Mangystau region</option>
+            <option>Zhambyl region</option>
+            <option>Jetisu region</option>
+            <option>Ulytau region</option>
+            <option>Abai region</option>
+          </select>
+        </div>
+
+        <div class="form-field full">
+          <label class="field-label" for="f-income">Parent monthly income</label>
+          <select class="field-input" id="f-income">
+            <option value="" disabled selected>Select range</option>
+            <option>Below 100,000 ₸</option>
+            <option>100,000 – 250,000 ₸</option>
+            <option>250,000 – 500,000 ₸</option>
+            <option>500,000 – 1,000,000 ₸</option>
+            <option>Above 1,000,000 ₸</option>
+            <option>Prefer not to say</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="modal-divider"></div>
+
+      <button class="modal-submit" id="modalSubmit">Create profile →</button>
+      <div class="modal-note">No password needed · We'll send a login link to your e-mail</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Custom cursor
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; cursor.style.left = mx + 'px'; cursor.style.top = my + 'px'; });
+function animRing() { rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12; ring.style.left = rx + 'px'; ring.style.top = ry + 'px'; requestAnimationFrame(animRing); }
+animRing();
+
+// Snow
+const canvas = document.getElementById('snow');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+
+const flakes = Array.from({length: 60}, () => ({
+  x: Math.random() * canvas.width,
+  y: Math.random() * canvas.height,
+  r: Math.random() * 2.5 + 0.5,
+  speed: Math.random() * 0.6 + 0.2,
+  drift: Math.random() * 0.3 - 0.15,
+  opacity: Math.random() * 0.5 + 0.1
+}));
+
+function drawSnow() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  flakes.forEach(f => {
+    ctx.beginPath();
+    ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(100,130,160,${f.opacity})`;
+    ctx.fill();
+    f.y += f.speed;
+    f.x += f.drift;
+    if (f.y > canvas.height) { f.y = -5; f.x = Math.random() * canvas.width; }
+    if (f.x > canvas.width) f.x = 0;
+    if (f.x < 0) f.x = canvas.width;
+  });
+  requestAnimationFrame(drawSnow);
+}
+drawSnow();
+
+// Reveal on scroll
+const reveals = document.querySelectorAll('.reveal');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.12 });
+reveals.forEach(r => obs.observe(r));
+
+// Plan tabs
+document.querySelectorAll('.plan-tab').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.plan-tab').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// Feature items
+document.querySelectorAll('.feature-item').forEach(item => {
+  item.addEventListener('mouseenter', function() {
+    document.querySelectorAll('.feature-item').forEach(i => i.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// Modal
+const overlay = document.getElementById('modalOverlay');
+const openBtn = document.getElementById('openModal');
+const closeBtn = document.getElementById('closeModal');
+const submitBtn = document.getElementById('modalSubmit');
+
+function openModal() {
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+openBtn.addEventListener('click', openModal);
+closeBtn.addEventListener('click', closeModal);
+overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+submitBtn.addEventListener('click', () => {
+  const username = document.getElementById('f-username').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const grade = document.getElementById('f-grade').value;
+  const region = document.getElementById('f-region').value;
+
+  if (!username || !email || !grade || !region) {
+    submitBtn.textContent = 'Fill required fields ↑';
+    submitBtn.style.background = 'var(--slate)';
+    setTimeout(() => {
+      submitBtn.textContent = 'Create profile →';
+      submitBtn.style.background = '';
+    }, 2000);
+    return;
+  }
+
+  submitBtn.textContent = 'Profile created ✓';
+  submitBtn.style.background = 'var(--deep)';
+  submitBtn.disabled = true;
+  setTimeout(() => {
+    closeModal();
+    submitBtn.textContent = 'Create profile →';
+    submitBtn.style.background = '';
+    submitBtn.disabled = false;
+  }, 1800);
+});
+</script>
+</body>
+</html>
