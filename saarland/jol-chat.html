@@ -790,14 +790,20 @@ async function send() {
       body: JSON.stringify({ chatInput: text, sessionId, user_id })
     });
 
-    const raw   = await res.json();
+    const text = await res.text();
     typingRow.remove();
+    console.log('[Жол] n8n raw text:', text);
 
-    // unwrap n8n array if needed, then read output
-    const data  = Array.isArray(raw) ? (raw[0]?.json ?? raw[0]) : raw;
-    console.log('[Жол] n8n raw:', JSON.stringify(raw));
-    console.log('[Жол] n8n data:', JSON.stringify(data));
-    addMessage(data.output || 'No response received.', 'bot');
+    let reply;
+    try {
+      const raw  = JSON.parse(text);
+      const data = Array.isArray(raw) ? (raw[0]?.json ?? raw[0]) : raw;
+      reply = typeof data === 'string' ? data : data.output;
+    } catch(e) {
+      // n8n returned plain text directly
+      reply = text;
+    }
+    addMessage(reply || 'No response received.', 'bot');
   } catch (err) {
     typingRow.remove();
     addMessage('Connection error — please check your connection and try again.', 'bot');
