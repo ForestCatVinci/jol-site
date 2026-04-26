@@ -1454,22 +1454,26 @@ signinSubmit.addEventListener('click', async () => {
   signinSubmit.textContent = 'Sending…';
   signinSubmit.disabled = true;
   try {
-    const siRes  = await fetch('https://multistory-jackelyn-aggadic.ngrok-free.dev/webhook-test/50f7b0a7-386e-47e3-9346-36c1838b6018', {
+    const siRes  = await fetch('http://localhost:5678/webhook/50f7b0a7-386e-47e3-9346-36c1838b6018', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email })
     });
     const siData = await siRes.json().catch(() => ({}));
+    if (siData.status === 'not_found') {
+      signinSubmit.textContent = 'No account found — sign up first';
+      signinSubmit.style.background = 'var(--slate)';
+      signinSubmit.disabled = false;
+      setTimeout(() => { signinSubmit.textContent = 'Continue →'; signinSubmit.style.background = ''; }, 3000);
+      return;
+    }
     if (siData.user_id) localStorage.setItem('jol_user_id', siData.user_id);
-    signinSubmit.textContent = 'Link sent ✓';
+    signinSubmit.textContent = 'Signed in ✓';
     signinSubmit.style.background = 'var(--deep)';
     setTimeout(() => {
       closeSignIn();
-      signinSubmit.textContent = 'Continue →';
-      signinSubmit.style.background = '';
-      signinSubmit.disabled = false;
-      document.getElementById('si-email').value = '';
-    }, 2000);
+      window.location.href = 'jol-chat.html';
+    }, 900);
   } catch (err) {
     signinSubmit.textContent = 'Connection error — retry';
     signinSubmit.style.background = 'var(--slate)';
@@ -1522,9 +1526,9 @@ submitBtn.addEventListener('click', async () => {
   localStorage.setItem('jol_user_id', user_id);
 
   try {
-    const res  = await fetch('https://multistory-jackelyn-aggadic.ngrok-free.dev/webhook-test/1307025e-4ce7-4064-af7d-ec4ac8b4162c', {
+    const res  = await fetch('http://localhost:5678/webhook/1307025e-4ce7-4064-af7d-ec4ac8b4162c', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, email, telegram, grade, region, income, user_id })
     });
     const data = await res.json().catch(() => ({}));
