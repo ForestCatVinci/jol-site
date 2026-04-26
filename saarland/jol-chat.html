@@ -747,7 +747,7 @@ function fillPrompt(text) {
   input.focus();
 }
 
-const WEBHOOK_URL = 'http://localhost:5678/webhook/5c8d5ff3-42be-49ef-90cd-d14073ee6024';
+const WEBHOOK_URL = 'http://localhost:5678/webhook-test/5c8d5ff3-42be-49ef-90cd-d14073ee6024';
 
 // Per-page-load session ID for conversation threading
 const sessionId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
@@ -797,10 +797,11 @@ async function send() {
     let reply;
     try {
       const raw  = JSON.parse(rawText);
-      const data = Array.isArray(raw) ? (raw[0]?.json ?? raw[0]) : raw;
-      reply = typeof data === 'string' ? data : data.output;
-    } catch(e) {
-      reply = rawText;
+      const item = Array.isArray(raw) ? raw[0] : raw;
+      const data = item?.json ?? item;
+      reply = data?.output ?? (typeof data === 'string' ? data : null);
+    } catch (e) {
+      reply = rawText.trim() || null;
     }
     addMessage(reply || 'No response received.', 'bot');
   } catch (err) {
